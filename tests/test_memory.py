@@ -1,7 +1,7 @@
 import logging
 import rwmem
 
-logging.getLogger('Rwmem').setLevel(logging.WARNING)
+logging.getLogger('rwmem').setLevel(logging.WARNING)
 
 rwm = rwmem.Rwmem("explorer")
 
