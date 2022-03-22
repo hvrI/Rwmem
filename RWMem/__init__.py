@@ -26,6 +26,16 @@ logger.addHandler(logging.NullHandler())
 
 
 class RWMem(object):
+    """Initialize the RWMem class.
+    If process_name or process_id is given, will open the running process.
+    
+    Parameters
+    ----------
+    process_name: str
+        The name of the process to be opened.
+    process_id: int
+        The identifier of the local process to be opened.
+    """
     
     def __init__(self, process_name: Optional[str]=None, *, process_id: Optional[int]=None):
         self.process_name = process_name
@@ -41,32 +51,71 @@ class RWMem(object):
         return f"<RWMem Instance: {self.process_name}>"
     
     def open_process(self, process_id, inherit_handle=True, process_access=PROCESS_ALL_ACCESS):
+        """Open the process with all access on default and returns process handle
+        
+        Parameters
+        ----------
+        process_id: int
+            The PID of the process
+        inherit_handle: bool
+            Processes created by this process will inherit the handle.
+        process_access: int
+            The access to the process object.
+        """
         self.process_handle = ctypes.windll.kernel32.OpenProcess(process_access, inherit_handle, process_id)
         if self.process_handle:
             return self.process_handle
         raise exception.CouldNotOpenProcess(process_id)
     
     def set_process_info(self, process):
+        """Initialize process's information listed below
+        
+        process_name, process_id, process_handle, process_base_address
+        """
         self.process_name = process.name()
         self.process_id = process.pid
         self.open_process(self.process_id, False, PROCESS_ALL_ACCESS)
         self.base_address = self.get_base_addr()
     
     def find_process_from_name(self, process_name: str):
+        """Get the process by the process name and open the process.
+        
+        Parameters:
+        -----------
+        process_name: str
+            The name of the process to be opened.
+        
+        Returns True if the handle exists
+        """
         if process := [p for p in psutil.process_iter(attrs=['pid', 'name']) if process_name.lower() in p.name().lower()]:
             self.set_process_info(process[0])
             if self.process_handle:
-                return
+                return True
         raise exception.ProcessNotFound(process_name)
         
     def find_process_from_id(self, process_id: int):
+        """Get the process by the process PID and open the process.
+        
+        Parameters:
+        -----------
+        process_id: str
+            The identifier of the local process to be opened.
+        
+        Returns True if the handle exists
+        """
         if process := [p for p in psutil.process_iter(attrs=['pid', 'name']) if process_id == p.pid]:
             self.set_process_info(process[0])
             if self.process_handle:
-                return
+                return True
         raise exception.CouldNotOpenProcess(process_id)
     
     def get_base_addr(self):
+        """Get the process base address.
+        
+        Returns
+        int(base_address)
+            Process's base address
+        """
         try:
             base_addr = win32process.EnumProcessModules(self.process_handle)[0]
         except Exception:
