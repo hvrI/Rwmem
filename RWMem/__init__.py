@@ -6,6 +6,8 @@ import ctypes.wintypes
 
 import exception
 
+from typing import Optional
+
 
 __version__ = "0.0.1"
 __date__ = "23/12/2021"
@@ -25,14 +27,16 @@ logger.addHandler(logging.NullHandler())
 
 class RWMem(object):
     
-    def __init__(self, process_name: str = None):
+    def __init__(self, process_name: Optional[str] = None, *, process_id: Optional[int] = None):
         self.process_name = process_name
-        self.process_id = None
+        self.process_id = process_id
         self.process_handle = None
         self.base_address = None
         self.hwnd = None
         if process_name is not None:
             self.find_process_from_name(process_name=process_name)
+        elif process_id is not None:
+            self.find_process_from_id(process_id=process_id)
             
     def __repr__(self):
         return f"<RWMem Instance: {self.process_name}>"
@@ -49,16 +53,19 @@ class RWMem(object):
         if process := [p for p in psutil.process_iter(attrs=['pid', 'name']) if process_name.lower() in p.name().lower()]:
             self.set_process_info(process[0])
             if self.process_handle:
-                return self
-        raise exception.ProcessNotFound
+                return
+        raise exception.ProcessNotFound(process_name)
         
     def find_process_from_id(self, process_id: int):
         if process := [p for p in psutil.process_iter(attrs=['pid', 'name']) if process_id == p.pid]:
             self.set_process_info(process[0])
             if self.process_handle:
-                return self
-        raise exception.ProcessNotFound
+                return
+        raise exception.CouldNotOpenProcess(process_id)
     
     def get_base_addr(self):
-        base_addr = win32process.EnumProcessModules(self.process_handle)
-        return base_addr[0]
+        try:
+            base_addr = win32process.EnumProcessModules(self.process_handle)[0]
+        except Exception:
+            base_addr = None
+        return base_addr
