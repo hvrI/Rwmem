@@ -1,3 +1,7 @@
+import os, sys
+my_lib_path = os.path.abspath('p:\Python\ReadMem')
+sys.path.append(my_lib_path)
+
 import logging
 import rwmem
 

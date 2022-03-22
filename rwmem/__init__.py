@@ -9,7 +9,6 @@ import rwmem.memory
 
 from typing import Optional
 
-
 __version__ = "0.0.1"
 __author__ = "duel"
 __date__ = "23/12/2021"
