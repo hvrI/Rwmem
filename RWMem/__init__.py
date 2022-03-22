@@ -27,12 +27,11 @@ logger.addHandler(logging.NullHandler())
 
 class RWMem(object):
     
-    def __init__(self, process_name: Optional[str] = None, *, process_id: Optional[int] = None):
+    def __init__(self, process_name: Optional[str]=None, *, process_id: Optional[int]=None):
         self.process_name = process_name
         self.process_id = process_id
         self.process_handle = None
         self.base_address = None
-        self.hwnd = None
         if process_name is not None:
             self.find_process_from_name(process_name=process_name)
         elif process_id is not None:
@@ -41,12 +40,16 @@ class RWMem(object):
     def __repr__(self):
         return f"<RWMem Instance: {self.process_name}>"
     
+    def open_process(self, process_id, inherit_handle=True, process_access=PROCESS_ALL_ACCESS):
+        self.process_handle = ctypes.windll.kernel32.OpenProcess(process_access, inherit_handle, process_id)
+        if self.process_handle:
+            return self.process_handle
+        raise exception.CouldNotOpenProcess(process_id)
+    
     def set_process_info(self, process):
         self.process_name = process.name()
         self.process_id = process.pid
-        self.process_handle = ctypes.windll.kernel32.OpenProcess(
-            PROCESS_ALL_ACCESS, False, self.process_id
-        )
+        self.open_process(self.process_id, False, PROCESS_ALL_ACCESS)
         self.base_address = self.get_base_addr()
     
     def find_process_from_name(self, process_name: str):
@@ -69,3 +72,12 @@ class RWMem(object):
         except Exception:
             base_addr = None
         return base_addr
+    
+    def close_process(self):
+        if not self.process_handle:
+            return
+        result = ctypes.windll.kernel32.CloseHandle(self.process_handle)
+        return result != 0
+    
+rwm = RWMem("explorer")
+print(rwm.process_handle)
