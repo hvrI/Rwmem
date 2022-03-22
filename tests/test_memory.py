@@ -1,6 +1,9 @@
-from RWMem import RWmem
+import logging
+import rwmem
 
-rwm = RWmem("explorer")
+logging.getLogger('pymem').setLevel(logging.WARNING)
+
+rwm = rwmem.Rwmem("explorer")
 
 print(
 f"""

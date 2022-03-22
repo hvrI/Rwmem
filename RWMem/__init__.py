@@ -4,8 +4,8 @@ import win32process
 import ctypes
 import ctypes.wintypes
 
-import RWMem.exception
-import RWMem.memory
+import rwmem.exception
+import rwmem.memory
 
 from typing import Optional
 
@@ -27,7 +27,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.NullHandler())
 
 
-class RWmem(object):
+class Rwmem(object):
     """Initialize the RWMem class.
     If process_name or process_id is given, will open the running process.
     
@@ -67,7 +67,7 @@ class RWmem(object):
         self.process_handle = ctypes.windll.kernel32.OpenProcess(process_access, inherit_handle, process_id)
         if self.process_handle:
             return self.process_handle
-        raise RWMem.exception.CouldNotOpenProcess(process_id)
+        raise rwmem.exception.CouldNotOpenProcess(process_id)
     
     def set_process_info(self, process):
         """Initialize process's information listed below
@@ -93,7 +93,7 @@ class RWmem(object):
             self.set_process_info(process[0])
             if self.process_handle:
                 return True
-        raise RWMem.exception.ProcessNotFound(process_name)
+        raise rwmem.exception.ProcessNotFound(process_name)
         
     def find_process_from_id(self, process_id: int):
         """Get the process by the process PID and open the process.
@@ -109,7 +109,7 @@ class RWmem(object):
             self.set_process_info(process[0])
             if self.process_handle:
                 return True
-        raise RWMem.exception.CouldNotOpenProcess(process_id)
+        raise rwmem.exception.CouldNotOpenProcess(process_id)
     
     def get_base_addr(self):
         """Get the process base address.
@@ -136,9 +136,9 @@ class RWmem(object):
     
     def read_bytes(self, address: int, length: int=100):
         if not self.process_handle:
-            raise RWMem.exception.ProcessError('You must open a process before calling this method')
+            raise rwmem.exception.ProcessError('You must open a process before calling this method')
         try:
-            value = RWMem.memory.read_bytes(self.process_handle, address, length)
+            value = rwmem.memory.read_bytes(self.process_handle, address, length)
         except Exception as e:
             print(e)
         else:
@@ -146,7 +146,7 @@ class RWmem(object):
         
     def read_string(self, address: int, length: int=100):
         if not self.process_handle:
-            raise RWMem.exception.ProcessError('You must open a process before calling this method')
+            raise rwmem.exception.ProcessError('You must open a process before calling this method')
         try:
             result = self.read_bytes(address, length)
         except Exception as e:
