@@ -4,12 +4,14 @@ import win32process
 import ctypes
 import ctypes.wintypes
 
-import exception
+import RWMem.exception
+import RWMem.memory
 
 from typing import Optional
 
 
 __version__ = "0.0.1"
+__author__ = "duel"
 __date__ = "23/12/2021"
 
 
@@ -25,7 +27,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.NullHandler())
 
 
-class RWMem(object):
+class RWmem(object):
     """Initialize the RWMem class.
     If process_name or process_id is given, will open the running process.
     
@@ -65,7 +67,7 @@ class RWMem(object):
         self.process_handle = ctypes.windll.kernel32.OpenProcess(process_access, inherit_handle, process_id)
         if self.process_handle:
             return self.process_handle
-        raise exception.CouldNotOpenProcess(process_id)
+        raise RWMem.exception.CouldNotOpenProcess(process_id)
     
     def set_process_info(self, process):
         """Initialize process's information listed below
@@ -91,7 +93,7 @@ class RWMem(object):
             self.set_process_info(process[0])
             if self.process_handle:
                 return True
-        raise exception.ProcessNotFound(process_name)
+        raise RWMem.exception.ProcessNotFound(process_name)
         
     def find_process_from_id(self, process_id: int):
         """Get the process by the process PID and open the process.
@@ -107,7 +109,7 @@ class RWMem(object):
             self.set_process_info(process[0])
             if self.process_handle:
                 return True
-        raise exception.CouldNotOpenProcess(process_id)
+        raise RWMem.exception.CouldNotOpenProcess(process_id)
     
     def get_base_addr(self):
         """Get the process base address.
@@ -123,10 +125,31 @@ class RWMem(object):
         return base_addr
     
     def close_process(self):
+        """Closes an open object handle.
+        
+        Returns True if the closure is succeeded
+        """
         if not self.process_handle:
             return
         result = ctypes.windll.kernel32.CloseHandle(self.process_handle)
         return result != 0
     
-rwm = RWMem("explorer")
-print(rwm.process_handle)
+    def read_bytes(self, address: int, length: int=100):
+        if not self.process_handle:
+            raise RWMem.exception.ProcessError('You must open a process before calling this method')
+        try:
+            value = RWMem.memory.read_bytes(self.process_handle, address, length)
+        except Exception as e:
+            print(e)
+        else:
+            return value
+        
+    def read_string(self, address: int, length: int=100):
+        if not self.process_handle:
+            raise RWMem.exception.ProcessError('You must open a process before calling this method')
+        try:
+            result = self.read_bytes(address, length)
+        except Exception as e:
+            print(e)
+        else:
+            return "".join([chr(int(hex, 16)) for hex in result if int(hex, 16) != 0])
