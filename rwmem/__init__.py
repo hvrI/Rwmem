@@ -172,3 +172,13 @@ class Rwmem(object):
             print(e)
         else:
             return "".join([chr(int(hex, 16)) for hex in result if int(hex, 16) != 0])
+        
+    def write_string(self, address: int, value: str):
+        if not self.process_handle:
+            raise rwmem.exception.ProcessError('You must open a process before calling this method')
+        try:
+            result = rwmem.memory.write_string(self.process_handle, address, value)
+        except Exception as e:
+            print(e)
+        else:
+            return result

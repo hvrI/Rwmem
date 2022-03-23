@@ -1,5 +1,4 @@
 import ctypes
-from multiprocessing.sharedctypes import Value
 
 import rwmem.exception
 
@@ -80,3 +79,15 @@ def read_float(handle: int, address: int):
         raise rwmem.exception.WinAPIError(e) from e
     else:
         return read_buffer.value
+    
+def write_string(handle: int, address: int, value: str):
+    try:
+        write_buffer = ctypes.create_string_buffer(value.encode())
+        addr_buffer = ctypes.byref(write_buffer)
+        n_size = ctypes.sizeof(write_buffer)
+        lp_number_of_bytes_read = ctypes.c_size_t()
+        res = ctypes.windll.kernel32.WriteProcessMemory(handle, ctypes.c_void_p(address), addr_buffer, n_size, lp_number_of_bytes_read)
+    except (TypeError, ValueError, BufferError) as e:
+        raise rwmem.exception.WinAPIError(e) from e
+    else:
+        return bool(res)

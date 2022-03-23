@@ -8,6 +8,6 @@ import rwmem
 logging.getLogger('rwmem').setLevel(logging.WARNING)
 
 rwm = rwmem.Rwmem("explorer")
+print(rwm.read_string(0x556c11a))
 
-print(rwm.read_string(0xa10000, 50))
 
