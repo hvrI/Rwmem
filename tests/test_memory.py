@@ -7,7 +7,9 @@ import rwmem
 
 logging.getLogger('rwmem').setLevel(logging.WARNING)
 
-rwm = rwmem.Rwmem("explorer")
-print(rwm.read_string(0x556c11a))
+rwm = rwmem.Rwmem("Minecraft.Windows.exe")
+
+ptr = rwm.get_pointer_addr(rwm.base_address+0x82DD40, [0x74, 0x2C, 0xC7, 0x45, 0xB8, 0x00, 0x00, 0xE0, 0x40])
+print(ptr)
 
 

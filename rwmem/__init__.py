@@ -123,6 +123,15 @@ class Rwmem(object):
             base_addr = None
         return base_addr
     
+    def get_pointer_addr(self, address: hex, offsets: list = None):
+        if offsets is None:
+            return address
+        address = self.read_int(address)
+        for offset in offsets:
+            if offset != offsets[-1]:
+                address = self.read_int(address + offset)
+        return address + offsets[-1]
+    
     def close_process(self):
         """Closes an open object handle.
         
