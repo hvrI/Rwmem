@@ -12,3 +12,7 @@ class CouldNotOpenProcess(Exception):
 class ProcessError(Exception):
     def __init__(self, message):
         super(ProcessError, self).__init__(message)
+        
+class WinAPIError(Exception):
+    def __init__(self, message):
+        super(WinAPIError, self).__init__(message)

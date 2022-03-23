@@ -1,5 +1,5 @@
 import os, sys
-my_lib_path = os.path.abspath('p:\Python\ReadMem')
+my_lib_path = os.path.abspath('p:\Python\Rwmem')
 sys.path.append(my_lib_path)
 
 import logging
@@ -9,11 +9,5 @@ logging.getLogger('rwmem').setLevel(logging.WARNING)
 
 rwm = rwmem.Rwmem("explorer")
 
-print(
-f"""
-{rwm.process_name}
-{rwm.process_id}
-{rwm.process_handle}
-{rwm.base_address}
-"""
-)
+print(rwm.read_string(0xa10000, 50))
+

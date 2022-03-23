@@ -133,7 +133,7 @@ class Rwmem(object):
         result = ctypes.windll.kernel32.CloseHandle(self.process_handle)
         return result != 0
     
-    def read_bytes(self, address: int, length: int=100):
+    def read_bytes(self, address: int, length: int=60):
         if not self.process_handle:
             raise rwmem.exception.ProcessError('You must open a process before calling this method')
         try:
@@ -143,7 +143,27 @@ class Rwmem(object):
         else:
             return value
         
-    def read_string(self, address: int, length: int=100):
+    def read_int(self, address: int):
+        if not self.process_handle:
+            raise rwmem.exception.ProcessError('You must open a process before calling this method')
+        try:
+            value = rwmem.memory.read_int(self.process_handle, address)
+        except Exception as e:
+            print(e)
+        else:
+            return value
+        
+    def read_float(self, address: int):
+        if not self.process_handle:
+            raise rwmem.exception.ProcessError('You must open a process before calling this method')
+        try:
+            value = rwmem.memory.read_float(self.process_handle, address)
+        except Exception as e:
+            print(e)
+        else:
+            return value
+        
+    def read_string(self, address: int, length: int=60):
         if not self.process_handle:
             raise rwmem.exception.ProcessError('You must open a process before calling this method')
         try:
