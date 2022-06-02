@@ -80,6 +80,31 @@ def read_float(handle: int, address: int):
     else:
         return read_buffer.value
     
+def read_double(handle: int, address: int):
+    try:
+        read_buffer = ctypes.c_double()
+        addr_buffer = ctypes.byref(read_buffer)
+        n_size = ctypes.sizeof(read_buffer)
+        lp_number_of_bytes_read = ctypes.c_ulong(0)
+        ctypes.windll.kernel32.ReadProcessMemory(handle, ctypes.c_void_p(address), addr_buffer, n_size, lp_number_of_bytes_read)
+    except (TypeError, ValueError, BufferError) as e:
+        raise rwmem.exception.WinAPIError(e) from e
+    else:
+        return read_buffer.value
+    
+def write_int(handle: int, address: int, value: str):
+    try:
+        for x in value:
+            write_buffer = ctypes.c_uint(int(x))
+            addr_buffer = ctypes.byref(write_buffer)
+            n_size = ctypes.sizeof(write_buffer)
+            lp_number_of_bytes_read = ctypes.c_ulong(0)
+            res = ctypes.windll.kernel32.WriteProcessMemory(handle, ctypes.c_void_p(address), addr_buffer, n_size, lp_number_of_bytes_read)
+    except (TypeError, ValueError, BufferError) as e:
+        raise rwmem.exception.WinAPIError(e) from e
+    else:
+        return bool(res)
+    
 def write_string(handle: int, address: int, value: str):
     try:
         write_buffer = ctypes.create_string_buffer(value.encode())

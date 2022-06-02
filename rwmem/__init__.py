@@ -10,7 +10,7 @@ import rwmem.memory
 from typing import Optional
 
 __version__ = "0.0.1"
-__author__ = "duel"
+__author__ = "hurl"
 __date__ = "23/12/2021"
 
 
@@ -167,6 +167,16 @@ class Rwmem(object):
             raise rwmem.exception.ProcessError('You must open a process before calling this method')
         try:
             value = rwmem.memory.read_float(self.process_handle, address)
+        except Exception as e:
+            print(e)
+        else:
+            return value
+        
+    def read_double(self, address: int):
+        if not self.process_handle:
+            raise rwmem.exception.ProcessError('You must open a process before calling this method')
+        try:
+            value = rwmem.memory.read_double(self.process_handle, address)
         except Exception as e:
             print(e)
         else:
